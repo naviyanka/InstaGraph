@@ -1,30 +1,27 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { 
-  Share2, LayoutDashboard, Network, Database, Shield, GitCompare, Settings,
-  RefreshCw, Activity, ZoomIn, ZoomOut, Focus, ArrowUpRight, EyeOff, X, FileText
+import {
+  Share2, LayoutDashboard, Network, Database, GitCompare, Settings
 } from 'lucide-react';
 import { signInAnonymously, onAuthStateChanged, signInWithCustomToken } from 'firebase/auth';
 import { doc, setDoc, onSnapshot, collection } from 'firebase/firestore';
 
-import { auth, db, appId } from './src/config/firebase';
-import { generateUser } from './src/utils/mockData';
-import { MOCK_NAMES } from './src/config/constants';
+import { auth, db, appId } from './config/firebase';
 
-import LoginPage from './src/views/LoginPage';
-import DashboardView from './src/views/DashboardView';
-import SettingsView from './src/views/SettingsView';
-import RelationshipMapperView from './src/views/RelationshipMapperView';
-import DataBrowserView from './src/views/DataBrowserView';
-import GraphView from './src/views/GraphView';
+import LoginPage from './views/LoginPage';
+import DashboardView from './views/DashboardView';
+import SettingsView from './views/SettingsView';
+import RelationshipMapperView from './views/RelationshipMapperView';
+import DataBrowserView from './views/DataBrowserView';
+import GraphView from './views/GraphView';
 
 export default function InstaGraphApp() {
   const [user, setUser] = useState(null);
   const [isAuthLoading, setIsAuthLoading] = useState(true);
-  const [currentView, setCurrentView] = useState('dashboard'); 
+  const [currentView, setCurrentView] = useState('dashboard');
   const [mockDatabase, setMockDatabase] = useState({ users: {}, connections: [] });
   const [settings, setSettings] = useState({ scrapeDepth: 1, stealthMode: true, instagramConnected: false });
-  const [vaultFilter, setVaultFilter] = useState('all'); 
-  
+  const [vaultFilter, setVaultFilter] = useState('all');
+
   // --- AUTH & DB SYNC ---
   useEffect(() => {
     const init = async () => {
@@ -40,7 +37,7 @@ export default function InstaGraphApp() {
   useEffect(() => {
     if (!user) return;
     const unsubSettings = onSnapshot(doc(db, 'artifacts', appId, 'users', user.uid, 'settings', 'config'), (s) => { if(s.exists()) setSettings(s.data()); });
-    const unsubProfiles = onSnapshot(collection(db, 'artifacts', appId, 'users', user.uid, 'profiles'), (s) => { 
+    const unsubProfiles = onSnapshot(collection(db, 'artifacts', appId, 'users', user.uid, 'profiles'), (s) => {
         const m = {}; s.forEach(d => m[d.id] = d.data()); setMockDatabase(p => ({ ...p, users: m }));
     });
     const unsubConns = onSnapshot(collection(db, 'artifacts', appId, 'users', user.uid, 'connections'), (s) => {
@@ -83,7 +80,7 @@ export default function InstaGraphApp() {
          {currentView === 'mapper' && <RelationshipMapperView database={mockDatabase} />}
          {currentView === 'data' && <DataBrowserView database={mockDatabase} initialFilter={vaultFilter} onBack={() => setCurrentView('dashboard')} />}
          {currentView === 'settings' && <SettingsView settings={settings} updateSettings={updateSettings} />}
-         
+
          {currentView === 'graph' && (
             <GraphView
               user={user}
